@@ -65,27 +65,18 @@ def main():
     if selection == "Information":
         st.info("General Information")
         st.markdown(
-            """
-            The purpose of this application is to classify news articles into categories such as sports, education, entertainment, business, and technology using machine learning models.
-
-            ### Model Details:
-            - **Multinomial Naive Bayes**
-            - **Random Forest**
-            - **K-Nearest Neighbors (KNN)**
-            - **Logistic Regression**
-            - **Support Vector Machine (SVM)**
-            - **Multi-Layer Perceptron (MLP) Classifier**
-
-            For each model, the application uses a TF-IDF vectorizer to transform text inputs and predict the category of the news article.
-
-            For detailed instructions on how to use this app, please refer to the README.md file located within this directory.
-            """
+            "The purpose of the classification models is to read articles and classify them into categories, which are sports, education, entertainment, business, and technology.\n\n"
+            "Model details:\n\n"
+            "The application makes use of various models which are Multinomial Naive Bayes, Random Forest, KNN, Logistic Regression, Support Vector Machine (SVM), and Multi-Layer Perceptron (MLP) Classifier."
         )
 
     # Building out the prediction page
     if selection == "Prediction":
         st.info("Prediction with ML Models")
         
+        # Prompt to start prediction
+        st.sidebar.info("Select 'Prediction' from the dropdown to start classifying news articles.")
+
         # Sidebar to select model
         model_options = {
             "Logistic Regression": lr_model,
