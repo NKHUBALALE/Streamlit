@@ -1,25 +1,3 @@
-"""
-Simple Streamlit webserver application for serving developed classification
-models.
-
-Author: ExploreAI Academy.
-
-Note:
----------------------------------------------------------------------
-Please follow the instructions provided within the README.md file
-located within this directory for guidance on how to use this script
-correctly.
----------------------------------------------------------------------
-
-Description: This file is used to launch a minimal streamlit web
-application. You are expected to extend the functionality of this script
-as part of your predict project.
-
-For further help with the Streamlit framework, see:
-
-https://docs.streamlit.io/en/latest/
-"""
-
 # Streamlit dependencies
 import streamlit as st
 import joblib
@@ -67,16 +45,15 @@ def main():
         st.markdown(
             "The purpose of the classification models is to read articles and classify them into categories, which are sports, education, entertainment, business, and technology.\n\n"
             "Model details:\n\n"
-            "The application makes use of various models which are Multinomial Naive Bayes, Random Forest, KNN, Logistic Regression, Support Vector Machine (SVM), and Multi-Layer Perceptron (MLP) Classifier."
+            "The application makes use of various models which are Multinomial Naive Bayes, Random Forest, KNN, Logistic Regression, Support Vector Machine (SVM), and Multi-Layer Perceptron (MLP) Classifier.\n\n"
+            "**Navigation:**\n\n"
+            "Click the dropdown menu on the sidebar to navigate between pages."
         )
 
     # Building out the prediction page
     if selection == "Prediction":
         st.info("Prediction with ML Models")
         
-        # Prompt to start prediction
-        st.sidebar.info("Select 'Prediction' from the dropdown to start classifying news articles.")
-
         # Sidebar to select model
         model_options = {
             "Logistic Regression": lr_model,
