@@ -25,6 +25,17 @@ svm_model = joblib.load(svm_model_path)
 knn_model = joblib.load(knn_model_path)
 mlp_model = joblib.load(mlp_model_path)
 
+# CSS for green text color
+sidebar_style = """
+    <style>
+        .sidebar-section {
+            color: green;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+"""
+
 # The main function where we will build the actual app
 def main():
     """News Classifier App with Streamlit """
@@ -34,6 +45,9 @@ def main():
     st.title("News Classifier")
     st.subheader("Analyzing news articles")
 
+    # Inject CSS for green text color
+    st.sidebar.markdown(sidebar_style, unsafe_allow_html=True)
+
     # Creating sidebar with selection box -
     # you can create multiple pages this way
     options = ["Information", "Prediction"]
@@ -42,18 +56,28 @@ def main():
     # Building out the "Information" page
     if selection == "Information":
         st.info("General Information")
+
+        # Navigation tip above the dropdown menu
+        st.sidebar.markdown(
+            """
+            <div class="sidebar-section">
+                <p><b>Navigation Tip:</b></p>
+                <p>Click the dropdown menu above to navigate between pages.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         st.markdown(
             "The purpose of the classification models is to read articles and classify them into categories, which are sports, education, entertainment, business, and technology.\n\n"
             "Model details:\n\n"
-            "The application makes use of various models which are Multinomial Naive Bayes, Random Forest, KNN, Logistic Regression, Support Vector Machine (SVM), and Multi-Layer Perceptron (MLP) Classifier.\n\n"
-            "**Navigation:**\n\n"
-            "Click the dropdown menu on the sidebar to navigate between pages."
+            "The application makes use of various models which are Multinomial Naive Bayes, Random Forest, KNN, Logistic Regression, Support Vector Machine (SVM), and Multi-Layer Perceptron (MLP) Classifier."
         )
 
     # Building out the prediction page
     if selection == "Prediction":
         st.info("Prediction with ML Models")
-        
+
         # Sidebar to select model
         model_options = {
             "Logistic Regression": lr_model,
@@ -63,6 +87,18 @@ def main():
             "KNN": knn_model,
             "MLP Classifier": mlp_model
         }
+
+        # Navigation tip below the model selection dropdown
+        st.sidebar.markdown(
+            """
+            <div class="sidebar-section">
+                <p><b>Navigation Tip:</b></p>
+                <p style="color: green;">Click the dropdown under 'Select Model' to navigate between models.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()))
 
         # Creating a text box for user input
