@@ -5,12 +5,6 @@ import os
 
 # Data dependencies
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.utils import resample
-from wordcloud import WordCloud, STOPWORDS
-import matplotlib.pyplot as plt
-import numpy as np
 from PIL import Image
 
 # Define file paths for models and vectorizer
@@ -20,10 +14,10 @@ lr_model_path = os.path.join(streamlit_dir, 'lr_classifier_model.pkl')
 nb_model_path = os.path.join(streamlit_dir, 'nb_classifier_model.pkl')
 rf_model_path = os.path.join(streamlit_dir, 'rf_classifier_model.pkl')
 svm_model_path = os.path.join(streamlit_dir, 'svm_classifier_model.pkl')
-knn_model_path = os.path.join(streamlit_dir, 'knn_classifier_model.pkl')
-mlp_model_path = os.path.join(streamlit_dir, 'mlp_classifier_model.pkl')
 data_path = os.path.join(streamlit_dir, 'train.csv')
 wordcloud_path = os.path.join(streamlit_dir, 'wordcloud_by_category.png')
+imbalanced_distribution_path = os.path.join(streamlit_dir, 'imbalanced_distribution.png')
+balanced_class_category_path = os.path.join(streamlit_dir, 'balanced_class_category.png')
 
 # Load your vectorizer and models
 tfidf_vectorizer = joblib.load(tfidf_vectorizer_path)
@@ -31,44 +25,9 @@ lr_model = joblib.load(lr_model_path)
 nb_model = joblib.load(nb_model_path)
 rf_model = joblib.load(rf_model_path)
 svm_model = joblib.load(svm_model_path)
-knn_model = joblib.load(knn_model_path)
-mlp_model = joblib.load(mlp_model_path)
 
 # Load your training data
 data = pd.read_csv(data_path)
-
-# CSS for green text color
-sidebar_style = """
-    <style>
-        .sidebar-section {
-            color: green;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-    </style>
-"""
-
-# Function to generate word clouds
-def generate_word_clouds(data):
-    categories = ['business', 'education', 'entertainment', 'sports', 'technology']
-    full_title = ['Business', 'Education', 'Entertainment', 'Sports', 'Technology']
-    exclude_words = set(['business', 'education', 'entertainment', 'sports', 'technology', 'https'])
-    wc = WordCloud(width=500, height=500, background_color='white', colormap='Dark2', max_font_size=150, random_state=42, stopwords=exclude_words)
-
-    plt.rcParams['figure.figsize'] = [20, 15]
-    plt.subplots_adjust(top=0.9)  # Adjust the top of the subplots to shift the headings up
-
-    # Create subplots
-    for i, category in enumerate(categories):
-        category_text = ' '.join(data.loc[data['category'] == category, 'cleaned_content'])
-        wc.generate(category_text)
-        
-        plt.subplot(2, 3, i + 1)  # 2 rows, 3 columns, and position i+1
-        plt.imshow(wc, interpolation='bilinear')
-        plt.axis("off")
-        plt.title(full_title[i])
-    
-    st.pyplot(plt)
 
 # Main function to build the Streamlit app
 def main():
@@ -79,22 +38,19 @@ def main():
     st.title("News Classifier")
     st.subheader("Analyzing news articles")
 
-    # Inject CSS for green text color in the sidebar
-    st.sidebar.markdown(sidebar_style, unsafe_allow_html=True)
-
-    # Sidebar navigation tip
+    # Sidebar navigation tip in green
     st.sidebar.markdown(
         """
-        <div class="sidebar-section">
-            <p><b>Navigation Tip:</b></p>
-            <p>Click the dropdown menu above to navigate between pages.</p>
+        <div class="sidebar-section" style="background-color:#28a745;padding:10px;border-radius:10px;">
+            <p style="color:white;"><b>Navigation Tip:</b></p>
+            <p style="color:white;">Click the dropdown menu above to navigate between pages.</p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
     # Sidebar with selection box for different pages
-    options = ["Information", "EDA", "Prediction"]
+    options = ["Information", "EDA", "Prediction", "About Us"]
     selection = st.sidebar.selectbox("Choose Option", options)
 
     # Building out the "Information" page
@@ -103,9 +59,11 @@ def main():
 
         st.markdown(
             """
-            The purpose of the classification models is to read articles and classify them into categories, which are sports, education, entertainment, business, and technology.\n\n"
-            Model details:\n\n"
-            The application makes use of various models which are Multinomial Naive Bayes, Random Forest, KNN, Logistic Regression, Support Vector Machine (SVM), and Multi-Layer Perceptron (MLP) Classifier.
+            The purpose of the classification models is to read articles and classify them into categories, which are sports, education, entertainment, business, and technology.
+            
+            ### Model details:
+            
+            The application makes use of various models which are Multinomial Naive Bayes, Random Forest, Logistic Regression, and Support Vector Machine (SVM).
             """
         )
 
@@ -123,17 +81,10 @@ def main():
             """
         )
 
-        # Plotting category distribution
-        category_counts = data['category'].value_counts()
-
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x=category_counts.index, y=category_counts.values, palette='viridis')
-        plt.xlabel('Category')
-        plt.ylabel('Number of Articles')
-        plt.title('Distribution of Articles by Category')
-        plt.xticks(rotation=45)
-
-        st.pyplot(plt)
+        # Displaying the imbalanced distribution image
+        st.subheader("Imbalanced Class Distribution")
+        imbalanced_image = Image.open(imbalanced_distribution_path)
+        st.image(imbalanced_image, caption='Imbalanced Distribution of Articles by Category')
 
         # Button to view balanced data
         if st.button("View Balanced Data"):
@@ -143,64 +94,9 @@ def main():
                 """
             )
 
-            # Separate each class
-            df_majority = data[data['category'] == 'education']
-            df_technology = data[data['category'] == 'technology']
-            df_entertainment = data[data['category'] == 'entertainment']
-            df_business = data[data['category'] == 'business']
-            df_sports = data[data['category'] == 'sports']
-
-            # Determine the target sample size for balancing
-            target_size = max(len(df_technology), len(df_entertainment), len(df_business), len(df_sports))
-
-            # Upsample minority classes
-            df_technology_upsampled = resample(df_technology,
-                                               replace=True,
-                                               n_samples=target_size,
-                                               random_state=123)
-
-            df_entertainment_upsampled = resample(df_entertainment,
-                                                  replace=True,
-                                                  n_samples=target_size,
-                                                  random_state=123)
-
-            df_business_upsampled = resample(df_business,
-                                             replace=True,
-                                             n_samples=target_size,
-                                             random_state=123)
-
-            df_sports_upsampled = resample(df_sports,
-                                           replace=True,
-                                           n_samples=target_size,
-                                           random_state=123)
-
-            # Undersample the majority class
-            df_majority_downsampled = resample(df_majority,
-                                               replace=False,
-                                               n_samples=target_size,
-                                               random_state=123)
-
-            # Combine the resampled dataframes
-            df_balanced = pd.concat([df_majority_downsampled,
-                                     df_technology_upsampled,
-                                     df_entertainment_upsampled,
-                                     df_business_upsampled,
-                                     df_sports_upsampled])
-
-            # Shuffle the combined dataframe to mix the classes
-            df_balanced = df_balanced.sample(frac=1, random_state=123).reset_index(drop=True)
-
-            # Plotting balanced category distribution
-            balanced_counts = df_balanced['category'].value_counts()
-
-            plt.figure(figsize=(10, 6))
-            sns.barplot(x=balanced_counts.index, y=balanced_counts.values, palette='viridis')
-            plt.xlabel('Category')
-            plt.ylabel('Number of Articles')
-            plt.title('Balanced Distribution of Articles by Category')
-            plt.xticks(rotation=45)
-
-            st.pyplot(plt)
+            # Displaying the balanced class category image
+            balanced_image = Image.open(balanced_class_category_path)
+            st.image(balanced_image, caption='Balanced Distribution of Articles by Category')
 
         # Displaying word cloud image
         st.subheader("The Most Used Words by Category")
@@ -217,25 +113,26 @@ def main():
             "Naive Bayes": nb_model,
             "Random Forest": rf_model,
             "SVM": svm_model,
-            "KNN": knn_model,
-            "MLP Classifier": mlp_model
         }
 
-        # Navigation tip below the model selection dropdown
-        st.sidebar.markdown(
-            """
-            <div class="sidebar-section">
-                <p><b>Navigation Tip:</b></p>
-                <p style="color: green;">Click the dropdown under 'Select Model' to navigate between models.</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        selected_model = st.sidebar.radio("Select Model", list(model_options.keys()))
 
-        selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()))
+        # Store selected model in session state
+        st.session_state.selected_model = selected_model
+
+        # Display the selected model in green
+        for model_name in model_options:
+            if st.session_state.selected_model == model_name:
+                st.sidebar.markdown(f'<p style="color:green;">{model_name}</p>', unsafe_allow_html=True)
+            else:
+                st.sidebar.markdown(f'<p>{model_name}</p>', unsafe_allow_html=True)
 
         # Creating a text box for user input
-        news_text = st.text_area("Enter Text", "Type Here")
+        news_text = st.text_area("Enter Text", value="", help="Start typing to classify")
+
+        # Placeholder text handling
+        if news_text == "":
+            st.markdown('<p style="color:gray;">Type a text in the box and click classify...</p>', unsafe_allow_html=True)
 
         if st.button("Classify"):
             # Transforming user input with vectorizer
@@ -247,6 +144,24 @@ def main():
 
             # Display prediction
             st.success(f"Text Categorized as: {prediction}")
+
+    # Building out the About Us page
+    if selection == "About Us":
+        st.info("About Us")
+
+        st.markdown(
+            """
+            This application was developed by Team_MM1, a group of data science students from the ExploreAI academy under the supervised classification sprint [Team_MM1] as a project to classify news articles into categories using machine learning models. It demonstrates the use of various classification algorithms to analyze and categorize text data.
+
+            For more information or inquiries, please contact us at mm1_classification@sandtech.co.za.
+
+            ---
+
+            **Our Mission:**
+
+            "We are here to innovate Africa and the world through data-driven insights, one article at a time."
+            """
+        )
 
 # Execute the main function
 if __name__ == '__main__':
