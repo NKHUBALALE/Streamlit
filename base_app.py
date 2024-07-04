@@ -18,6 +18,8 @@ data_path = os.path.join(streamlit_dir, 'train.csv')
 wordcloud_path = os.path.join(streamlit_dir, 'wordcloud_by_category.png')
 imbalanced_distribution_path = os.path.join(streamlit_dir, 'imbalanced_distribution.png')
 balanced_class_category_path = os.path.join(streamlit_dir, 'balanced_class_category.png')
+stone_image_path = os.path.join(streamlit_dir, 'stone.png')
+screenshot_image_path = os.path.join(streamlit_dir, 'Screenshot 2024-07-04 203832.png')
 
 # Load your vectorizer and models
 tfidf_vectorizer = joblib.load(tfidf_vectorizer_path)
@@ -50,8 +52,28 @@ def main():
     )
 
     # Sidebar with selection box for different pages
-    options = ["Information", "EDA", "Prediction", "About Us"]
+    options = ["Home", "Information", "EDA", "Prediction", "Feedback", "About Us"]
     selection = st.sidebar.selectbox("Choose Option", options)
+
+    # Building out the "Home" page
+    if selection == "Home":
+        st.info("Welcome to the News Classifier App!")
+        
+        st.markdown(
+            """
+            This application is designed to classify news articles into categories such as sports, education, entertainment, business, and technology using various machine learning models.
+            """
+        )
+        
+        st.markdown(
+            """
+            Use the sidebar to navigate to different sections of the application, including Information, EDA (Exploratory Data Analysis), Prediction, Feedback, and About Us.
+            """
+        )
+        
+        # Displaying the screenshot image below the texts
+        screenshot_image = Image.open(screenshot_image_path)
+        st.image(screenshot_image, caption='Welcome to the News Classifier App!')
 
     # Building out the "Information" page
     if selection == "Information":
@@ -61,9 +83,21 @@ def main():
             """
             The purpose of the classification models is to read articles and classify them into categories, which are sports, education, entertainment, business, and technology.
             
-            ### Model details:
+            ### Model Details:
             
             The application makes use of various models which are Multinomial Naive Bayes, Random Forest, Logistic Regression, and Support Vector Machine (SVM).
+            """
+        )
+        
+        # Adding Documentation section
+        st.markdown(
+            """
+            ### Documentation:
+            
+            - **Multinomial Naive Bayes:** A probabilistic model based on Bayes' theorem, used for text classification.
+            - **Random Forest:** An ensemble learning method using multiple decision trees for improved accuracy.
+            - **Logistic Regression:** A statistical model for binary classification, extended for multi-class classification.
+            - **Support Vector Machine (SVM):** A supervised learning model for classification by finding the optimal hyperplane.
             """
         )
 
@@ -128,11 +162,7 @@ def main():
                 st.sidebar.markdown(f'<p>{model_name}</p>', unsafe_allow_html=True)
 
         # Creating a text box for user input
-        news_text = st.text_area("Enter Text", value="", help="Start typing to classify")
-
-        # Placeholder text handling
-        if news_text == "":
-            st.markdown('<p style="color:gray;">Type a text in the box and click classify...</p>', unsafe_allow_html=True)
+        news_text = st.text_area("Type a text to classify", "")
 
         if st.button("Classify"):
             # Transforming user input with vectorizer
@@ -145,9 +175,27 @@ def main():
             # Display prediction
             st.success(f"Text Categorized as: {prediction}")
 
+    # Building out the Feedback page
+    if selection == "Feedback":
+        st.info("Feedback")
+
+        st.markdown(
+            """
+            We value your feedback! Please provide your comments and suggestions to help us improve this application.
+            """
+        )
+
+        feedback_text = st.text_area("Your Feedback", "")
+        if st.button("Submit Feedback"):
+            st.success("Thank you for your feedback!")
+
     # Building out the About Us page
     if selection == "About Us":
         st.info("About Us")
+
+        # Displaying the stone background image with reduced size
+        stone_image = Image.open(stone_image_path)
+        st.image(stone_image, use_column_width=False, width=300)
 
         st.markdown(
             """
